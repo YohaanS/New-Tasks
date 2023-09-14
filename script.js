@@ -56,20 +56,17 @@ function addTask() {
     const selectedPriority = priorityDropdown.value;
 
     const dueDateInput = document.getElementById('dueDateInput');
-    const dueDate = dueDateInput.value; // Get the selected due date
+    const dueDate = dueDateInput.value.trim(); // Get the selected due date as text
 
-    // Check if the due date is before today (without considering time)
+    // Check if the due date is before today (without considering time) or not specified
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set time to midnight
-    const dueDateObj = new Date(dueDate);
+    const dueDateObj = dueDate ? new Date(dueDate) : null;
     
-    if (dueDateObj < today) {
+    if (dueDateObj && dueDateObj < today) {
         alert('Due date is before today. Task not added.');
         return;
     }
-
-    // Set the time portion of the due date to midnight
-    dueDateObj.setHours(0, 0, 0, 0);
 
     const taskList = document.getElementById('taskList');
     const li = document.createElement('li');
@@ -79,7 +76,7 @@ function addTask() {
             <div class="task-details">
                 <span class="task-category">${selectedCategory}</span>
                 <span class="task-priority ${selectedPriority}">${selectedPriority}</span>
-                <span class="task-due-date">${formatDate(dueDateObj)}</span> <!-- Display due date -->
+                <span class="task-due-date">${dueDate || 'No Due Date'}</span> <!-- Display due date or 'No Due Date' -->
                 <button class="complete-button" onclick="completeTask(this)">Complete</button>
                 <button class="delete-button" onclick="removeTask(this)">Delete</button>
             </div>
@@ -91,6 +88,7 @@ function addTask() {
     dueDateInput.value = '';
 
 }
+
 
 // Function to format a date as "YYYY-MM-DD"
 function formatDate(date) {
