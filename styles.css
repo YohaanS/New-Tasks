@@ -184,3 +184,9 @@ h1 {
 .sort-button:hover {
     background-color: #286090; /* Darker blue on hover */
 }
+
+.completed {
+    text-decoration: line-through; /* Add line-through to the text of completed tasks */
+    color: #777; /* You can adjust the color as needed */
+    opacity: 0.6; /* You can adjust the opacity to make completed tasks less prominent */
+}
