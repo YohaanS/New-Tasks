@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login and Registration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,32 +48,103 @@
         button:hover {
             background-color: #45a049;
         }
+
+        .logout-button {
+            background-color: #f44336;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2>Login</h2>
+        <h2>Login or Register</h2>
         <form id="loginForm">
             <input type="text" id="username" placeholder="Username" required>
             <input type="password" id="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
+        <button id="registerButton">Register</button>
+        <button id="logoutButton" class="logout-button" style="display:none;">Logout</button>
     </div>
 
     <script>
-        document.getElementById("loginForm").addEventListener("submit", function (e) {
+        // Check if a user is already logged in
+        const loggedInUser = localStorage.getItem('loggedInUser');
+
+        if (loggedInUser) {
+            document.getElementById('username').value = loggedInUser;
+            document.getElementById('logoutButton').style.display = 'inline-block';
+        }
+
+        // Login event
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-            // Retrieve the entered username and password
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
+            const storedUser = localStorage.getItem(username);
 
-            // Check if both fields are non-empty
-            if (username && password) {
-                // Redirect to the task manager (replace 'task_manager.html' with the actual URL)
-                window.location.href = 'task_manager.html';
+            if (storedUser && JSON.parse(storedUser).password === password) {
+                alert('Login successful!');
+                localStorage.setItem('loggedInUser', username);
+                document.getElementById('logoutButton').style.display = 'inline-block';
             } else {
-                alert("Please enter both username and password.");
+                alert('Invalid credentials. Please try again or register.');
+            }
+        });
+
+        // Register event
+        document.getElementById('registerButton').addEventListener('click', function () {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                localStorage.setItem(username, JSON.stringify({ password }));
+                alert('Registration successful! You can now log in.');
+            } else {
+                alert('Please enter both a username and password.');
+            }
+        });
+
+        // Logout event
+        document.getElementById('logoutButton').addEventListener('click', function () {
+            localStorage.removeItem('loggedInUser');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('logoutButton').style.display = 'none';
+        });
+        function redirectToTaskManager() {
+            window.location.href = 'task_manager.html'; // Replace with the actual URL
+        }
+
+        // Handle redirection after login or registration
+        function handleRedirection(username) {
+            localStorage.setItem('loggedInUser', username);
+            document.getElementById('logoutButton').style.display = 'inline-block';
+            redirectToTaskManager();
+        }
+
+        // Login event
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            // ... (login logic)
+            if (storedUser && JSON.parse(storedUser).password === password) {
+                alert('Login successful!');
+                handleRedirection(username);
+            } else {
+                alert('Invalid credentials. Please try again or register.');
+            }
+        });
+
+        // Register event
+        document.getElementById('registerButton').addEventListener('click', function () {
+            // ... (registration logic)
+            if (username && password) {
+                localStorage.setItem(username, JSON.stringify({ password }));
+                alert('Registration successful! You can now log in.');
+                handleRedirection(username);
+            } else {
+                alert('Please enter both a username and password.');
             }
         });
     </script>
