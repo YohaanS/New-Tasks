@@ -190,3 +190,26 @@ h1 {
     color: #777; /* You can adjust the color as needed */
     opacity: 0.6; /* You can adjust the opacity to make completed tasks less prominent */
 }
+
+.logout-button {
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.task-manager-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative; /* Add this line */
+}
+
+/* Move the logout button to the top left */
+#logoutButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}

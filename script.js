@@ -155,3 +155,22 @@ function notifyOverdueTasks() {
 
 // Function to periodically check for overdue tasks (every minute)
 setInterval(notifyOverdueTasks, 60000);
+
+// Check if a user is already logged in
+const loggedInUser = localStorage.getItem('loggedInUser');
+
+if (loggedInUser) {
+    // User is logged in, display the Logout button
+    const logoutButtonContainer = document.getElementById('logoutButtonContainer');
+    const logoutButton = document.createElement('button');
+    logoutButton.innerText = 'Logout';
+    logoutButton.className = 'logout-button';
+    logoutButtonContainer.appendChild(logoutButton);
+
+    // Add an event listener to handle logout
+    logoutButton.addEventListener('click', function () {
+        localStorage.removeItem('loggedInUser');
+        // Redirect to the login page (replace 'login.html' with the actual URL)
+        window.location.href = '/index.html';
+    });
+}
