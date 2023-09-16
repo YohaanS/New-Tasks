@@ -41,8 +41,6 @@ function updateCategoryDropdown() {
     });
 }
 
-
-
 // Function to add a new task
 function addTask() {
     const taskInput = document.getElementById('taskInput');
@@ -56,13 +54,13 @@ function addTask() {
     const selectedPriority = priorityDropdown.value;
 
     const dueDateInput = document.getElementById('dueDateInput');
-    const dueDate = dueDateInput.value.trim(); // Get the selected due date as text
+    const dueDate = dueDateInput.value.trim();
 
     // Check if the due date is before today (without considering time) or not specified
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set time to midnight
+    today.setHours(0, 0, 0, 0);
     const dueDateObj = dueDate ? new Date(dueDate) : null;
-    
+
     if (dueDateObj && dueDateObj < today) {
         alert('Due date is before today. Task not added.');
         return;
@@ -76,7 +74,7 @@ function addTask() {
             <div class="task-details">
                 <span class="task-category">${selectedCategory}</span>
                 <span class="task-priority ${selectedPriority}">${selectedPriority}</span>
-                <span class="task-due-date">${dueDate || 'No Due Date'}</span> <!-- Display due date or 'No Due Date' -->
+                <span class="task-due-date">${dueDate || 'No Due Date'}</span>
                 <button class="complete-button" onclick="completeTask(this)">Complete</button>
                 <button class="delete-button" onclick="removeTask(this)">Delete</button>
             </div>
@@ -87,8 +85,15 @@ function addTask() {
     taskInput.value = '';
     dueDateInput.value = '';
 
+    // Save the task to user data
+    saveTaskToUserData({
+        taskText,
+        selectedCategory,
+        selectedPriority,
+        dueDate,
+        completed: false,
+    });
 }
-
 
 // Function to format a date as "YYYY-MM-DD"
 function formatDate(date) {
@@ -118,6 +123,9 @@ function removeTask(button) {
     const taskList = document.getElementById('taskList');
     const li = button.closest('li');
     taskList.removeChild(li);
+
+    // Remove the task from user data
+    removeTaskFromUserData(li);
 }
 
 // Function to mark a task as complete
@@ -125,17 +133,132 @@ function completeTask(button) {
     const task = button.closest('.task');
     const taskText = task.querySelector('.task-text');
     taskText.classList.toggle('completed');
+
+    // Update the task completion status in user data
+    updateTaskCompletionStatus(task, taskText.classList.contains('completed'));
 }
 
 // Initialize the category dropdown
 updateCategoryDropdown();
+
+// Function to save a task to user data
+function saveTaskToUserData(taskData) {
+    // Retrieve the logged-in user's username from localStorage
+    const loggedInUser = localStorage.getItem('loggedInUser');
+
+    // Check if a user is logged in
+    if (loggedInUser) {
+        // Retrieve user data from localStorage or create a new object if it doesn't exist
+        const userData = JSON.parse(localStorage.getItem(loggedInUser)) || { tasks: [], settings: {} };
+
+        // Add the new task to the user's data
+        userData.tasks.push(taskData);
+
+        // Save the updated user data back to localStorage
+        localStorage.setItem(loggedInUser, JSON.stringify(userData));
+    }
+}
+
+// Function to remove a task from user data
+function removeTaskFromUserData(taskElement) {
+    // Retrieve the logged-in user's username from localStorage
+    const loggedInUser = localStorage.getItem('loggedInUser');
+
+    // Check if a user is logged in
+    if (loggedInUser) {
+        // Retrieve user data from localStorage
+        const userData = JSON.parse(localStorage.getItem(loggedInUser));
+
+        if (userData) {
+            // Find and remove the task data associated with the removed task element
+            const taskText = taskElement.querySelector('.task-text').textContent;
+            const updatedTasks = userData.tasks.filter((task) => task.taskText !== taskText);
+
+            // Save the updated user data back to localStorage
+            saveUserData(updatedTasks, userData.settings);
+        }
+    }
+}
+
+// Function to update the completion status of a task in user data
+function updateTaskCompletionStatus(taskElement, completed) {
+    // Retrieve the logged-in user's username from localStorage
+    const loggedInUser = localStorage.getItem('loggedInUser');
+
+    // Check if a user is logged in
+    if (loggedInUser) {
+        // Retrieve user data from localStorage
+        const userData = JSON.parse(localStorage.getItem(loggedInUser));
+
+        if (userData) {
+            // Find and update the task data associated with the completed task element
+            const taskText = taskElement.querySelector('.task-text').textContent;
+            const updatedTasks = userData.tasks.map((task) => {
+                if (task.taskText === taskText) {
+                    task.completed = completed;
+                }
+                return task;
+            });
+
+            // Save the updated user data back to localStorage
+            saveUserData(updatedTasks, userData.settings);
+        }
+    }
+}
+
+// Function to save user data after making changes
+function saveUserData(updatedTasks, updatedSettings) {
+    // Retrieve the logged-in user's username from localStorage
+    const loggedInUser = localStorage.getItem('loggedInUser');
+
+    // Check if a user is logged in
+    if (loggedInUser) {
+        // Retrieve user data from localStorage and parse it as JSON
+        const userData = JSON.parse(localStorage.getItem(loggedInUser));
+
+        if (userData) {
+            // Update user data with the provided tasks and settings
+            userData.tasks = updatedTasks;
+            userData.settings = updatedSettings;
+
+            // Save the updated user data back to localStorage
+            localStorage.setItem(loggedInUser, JSON.stringify(userData));
+        }
+    }
+}
+
+// Function to load user tasks and settings from localStorage and populate the UI
+function loadUserData() {
+    // Retrieve the logged-in user's username from localStorage
+    const loggedInUser = localStorage.getItem('loggedInUser');
+
+    // Check if a user is logged in
+    if (loggedInUser) {
+        // Retrieve user data from localStorage and parse it as JSON
+        const userData = JSON.parse(localStorage.getItem(loggedInUser));
+
+        if (userData) {
+            // Load user tasks and settings from userData and populate the UI
+            // You can implement this part based on your HTML structure and design
+        }
+    }
+}
+
+// Function to initialize the UI with user data
+function initializeUI() {
+    // Load user tasks and settings from localStorage and populate the UI
+    loadUserData();
+}
+
+// Call the initializeUI function to populate the UI with user data on page load
+initializeUI();
 
 function notifyOverdueTasks() {
     const taskList = document.getElementById('taskList');
     const tasks = taskList.getElementsByTagName('li');
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set time to midnight
+    today.setHours(0, 0, 0, 0);
 
     for (const task of tasks) {
         const dueDateText = task.querySelector('.task-due-date').textContent;
@@ -143,12 +266,8 @@ function notifyOverdueTasks() {
 
         if (dueDate < today && !task.classList.contains('overdue')) {
             task.classList.add('overdue');
-
-            // Display a notification
             const taskText = task.querySelector('.task-text').textContent;
             alert(`Task "${taskText}" is overdue!`);
-
-            // You can also customize the notification further, e.g., by using a toast notification library
         }
     }
 }
@@ -173,4 +292,23 @@ if (loggedInUser) {
         // Redirect to the login page (replace 'login.html' with the actual URL)
         window.location.href = '/index.html';
     });
+}
+
+
+// Save task
+function saveTask(task) {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.push(task);
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+
+// Save user settings
+function saveSettings(settings) {
+    localStorage.setItem('userSettings', JSON.stringify(settings));
+}
+
+// Get user settings
+function getSettings() {
+    return JSON.parse(localStorage.getItem('userSettings')) || {};
 }

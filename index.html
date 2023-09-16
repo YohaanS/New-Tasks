@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login and Registration</title>
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Include the Firebase Realtime Database script -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Include the Firebase Realtime Database script -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,7 +60,7 @@
         .logout-button {
             background-color: #f44336;
         }
-    </style>
+    </style> 
 </head>
 <body>
     <div class="login-container">
@@ -68,66 +76,96 @@
     </div>
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIfiU73d6EsLwtHVJDTCq2X9QQBGpj684",
+            authDomain: "task-manager-c8d7c.firebaseapp.com",
+            projectId: "task-manager-c8d7c",
+            storageBucket: "task-manager-c8d7c.appspot.com",
+            messagingSenderId: "248223082994",
+            appId: "1:248223082994:web:2367c9c1a720512a2f236b",
+            measurementId: "G-6MZSK5PT62"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
         // Check if a user is already logged in
         const loggedInUser = localStorage.getItem('loggedInUser');
 
         if (loggedInUser) {
-            document.getElementById('username').value = loggedInUser;
-            document.getElementById('logoutButton').style.display = 'inline-block';
-        }
+            // User is logged in, display the Logout button
+            const logoutButtonContainer = document.getElementById('logoutButtonContainer');
+            const logoutButton = document.createElement('button');
+            logoutButton.innerText = 'Logout';
+            logoutButton.className = 'logout-button';
+            logoutButtonContainer.appendChild(logoutButton);
 
-        // Function to handle redirection
-        function redirectToTaskManager() {
-            window.location.href = 'task_manager.html'; // Replace with the actual URL of your task manager page
-        }
-
-        // Function to handle login
-        function handleLogin(username, password) {
-            const storedUser = localStorage.getItem(username);
-
-            if (storedUser && JSON.parse(storedUser).password === password) {
-                alert('Login successful!');
-                localStorage.setItem('loggedInUser', username);
-                document.getElementById('logoutButton').style.display = 'inline-block';
-                redirectToTaskManager();
-            } else {
-                alert('Invalid credentials. Please try again or register.');
-            }
-        }
-
-        // Function to handle registration
-        function handleRegistration(username, password) {
-            if (username && password) {
-                localStorage.setItem(username, JSON.stringify({ password }));
-                alert('Registration successful! You can now log in.');
-                handleLogin(username, password);
-            } else {
-                alert('Please enter both a username and password.');
-            }
+            // Add an event listener to handle logout
+            logoutButton.addEventListener('click', function () {
+                auth.signOut()
+                    .then(() => {
+                        localStorage.removeItem('loggedInUser');
+                        window.location.href = '/login.html'; // Redirect to the login page
+                    })
+                    .catch((error) => {
+                        // Handle logout error
+                    });
+            });
         }
 
         // Login event
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            handleLogin(username, password);
+
+            const email = `${username}@yourdomain.com`
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // User logged in successfully
+                    alert('Login successful!');
+                    localStorage.setItem('loggedInUser', email);
+                    window.location.href = '/task_manager.html'; // Redirect to the task manager page
+                })
+                .catch((error) => {
+                    // Handle login error
+                    console.error('Login error:', error.message);
+                    alert('Invalid credentials. Please try again or register.');
+                });
         });
 
         // Register event
         document.getElementById('registerButton').addEventListener('click', function () {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            handleRegistration(username, password);
-        });
+    // Get the username and password from the form
+const username = document.getElementById('username').value;
+const password = document.getElementById('password').value;
 
-        // Logout event
-        document.getElementById('logoutButton').addEventListener('click', function () {
-            localStorage.removeItem('loggedInUser');
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('logoutButton').style.display = 'none';
-        });
+// Create a dummy email address using the username
+const email = `${username}@yourdomain.com`; // Use a dummy or custom domain
+
+auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        // User registered successfully
+        alert('Registration successful! You can now log in.');
+        localStorage.setItem('loggedInUser', username);
+        window.location.href = '/task_manager.html'; // Redirect to the task manager page
+    })
+    .catch((error) => {
+        // Handle registration error
+        console.error('Registration failed:', error.message);
+        alert('Registration failed. Please try again.');
+    });
+
+
+});
     </script>
 </body>
 </html>
+
+
+
